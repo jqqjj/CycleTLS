@@ -19,12 +19,12 @@ var disabledRedirect = func(req *http.Request, via []*http.Request) error {
 	return http.ErrUseLastResponse
 }
 
-func clientBuilder(browser browser, dialer proxy.ContextDialer, timeout int, disableRedirect bool) http.Client {
+func clientBuilder(browser browser, dialer proxy.ContextDialer, timeout int, disableRedirect bool) *http.Client {
 	//if timeout is not set in call default to 15
 	if timeout == 0 {
 		timeout = 15
 	}
-	client := http.Client{
+	client := &http.Client{
 		Transport: newRoundTripper(browser, dialer),
 		Timeout:   time.Duration(timeout) * time.Second,
 	}
@@ -36,12 +36,12 @@ func clientBuilder(browser browser, dialer proxy.ContextDialer, timeout int, dis
 }
 
 // newClient creates a new http client
-func newClient(browser browser, timeout int, disableRedirect bool, UserAgent string, proxyURL ...string) (http.Client, error) {
+func newClient(browser browser, timeout int, disableRedirect bool, UserAgent string, proxyURL ...string) (*http.Client, error) {
 	//fix check PR
 	if len(proxyURL) > 0 && len(proxyURL[0]) > 0 {
 		dialer, err := newConnectDialer(proxyURL[0], UserAgent)
 		if err != nil {
-			return http.Client{
+			return &http.Client{
 				Timeout:       time.Duration(timeout) * time.Second,
 				CheckRedirect: disabledRedirect, //fix this fallthrough issue (test for incorrect proxy)
 			}, err
